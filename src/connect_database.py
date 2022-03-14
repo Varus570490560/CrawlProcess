@@ -29,18 +29,27 @@ def execute_sql(db: pymysql.connections.Connection, sql: str, args: tuple = None
         return cursor.fetchall()
     except pymysql.Error as e:
         print(e)
+        return None
     finally:
         cursor.close()
 
 
-def save(db: pymysql.connections.Connection, table_name: str, val: dict, unique_keys: tuple):
-    lst: list = list()
-    for unique_key in unique_keys:
-        lst.append(val[unique_key])
-    sha256 = generate_sha256(unique_values=tuple(lst))
+def save(db: pymysql.connections.Connection, table_name: str, val: dict, unique_keys: tuple = None):
+    if unique_keys is not None:
+        lst: list = list()
+        for unique_key in unique_keys:
+            lst.append(val[unique_key])
+        sha256_dict = {'sha256': generate_sha256(unique_values=tuple(lst))}
+        crawl_db = open_database('crawl')
+        if save(db=crawl_db, table_name='remove_duplication', val=sha256_dict) is False:
+            return False
+        close_database(crawl_db)
     sql: str = "INSERT INTO `" + table_name + "` (" + keys_to_string(val=val) + ")VALUES(" + values_to_string(
         val=val) + ");"
-    execute_sql(db=db, sql=sql)
+    if execute_sql(db=db, sql=sql) is None:
+        return False
+    else:
+        return True
 
 
 def keys_to_string(val: dict):
@@ -56,7 +65,12 @@ def keys_to_string(val: dict):
 def values_to_string(val: dict):
     res: str = ''
     for value in val.values():
-        res = res + str(value)
+        value_str = str(value)
+        value_str.replace("'", "//'")
+        value_str.replace('"', '//"')
+        value_str ="'" + value_str + "'"
+        res = res + value_str
+
         res = res + ','
     res = res[:-1]
     return res
