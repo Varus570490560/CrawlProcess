@@ -66,8 +66,8 @@ def values_to_string(val: dict):
     res: str = ''
     for value in val.values():
         value_str = str(value)
-        value_str.replace("'", "//'")
-        value_str.replace('"', '//"')
+        value_str = value_str.replace("'", "\\'")
+        value_str = value_str.replace('"', '\\"')
         value_str ="'" + value_str + "'"
         res = res + value_str
 
