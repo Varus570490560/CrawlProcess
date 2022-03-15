@@ -7,16 +7,7 @@ def fun(params):
 
 
 task = [
-    (fun, 1, 2, 3),
-    (fun, 4, 5, 6),
-    (fun, 1, 2, 3),
-    (fun, 4, 5, 6),
-    (fun, 1, 2, 3),
-    (fun, 4, 5, 6),
-    (fun, 1, 2, 3),
-    (fun, 4, 5, 6),
-    (fun, 1, 2, 3),
-    (fun, 4, 5, 6),
+    (fun, 123,),
 ]
 task_index: int = 0
 lock: threading.Lock = threading.Lock()
@@ -61,6 +52,3 @@ def muti_thread_execute(thread_count: int):
     for i in range(0, thread_count):
         MutiThreadExecute(i).start()
 
-
-if __name__ == '__main__':
-    muti_thread_execute(2)
