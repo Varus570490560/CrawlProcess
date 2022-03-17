@@ -1,4 +1,5 @@
 import threading
+import math
 
 
 def fun(params):
@@ -51,4 +52,21 @@ class MutiThreadExecute(threading.Thread):
 def muti_thread_execute(thread_count: int):
     for i in range(0, thread_count):
         MutiThreadExecute(i).start()
+
+
+def split(func, begin_page: int, end_page: int, divide_count: int):
+    task_list = []
+    base: int = math.ceil((end_page - begin_page) / divide_count)
+    task_begin: int = begin_page
+    task_end: int
+    while True:
+        task_end = task_begin + base
+        if task_end > end_page:
+            task_end = end_page
+            if task_begin != task_end:
+                task_list.append((func, task_begin, task_end))
+            return task_list
+        else:
+            task_list.append((func, task_begin, task_end))
+            task_begin = task_end
 
