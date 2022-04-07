@@ -45,6 +45,10 @@ def save(db: pymysql.connections.Connection, table_name: str, val: dict, unique_
         sha256_dict = {'sha256': sha256}
         crawl_db = open_database('crawl')
         if save(db=crawl_db, table_name='remove_duplication', val=sha256_dict) is False:
+            reason = {}
+            for unique_key in unique_keys:
+                reason[unique_key] = val[unique_key]
+            print("Duplicate insert at: ", str(reason))
             return False
         close_database(crawl_db)
     sql: str = "INSERT INTO `" + table_name + "` (" + keys_to_string(val=val) + ")VALUES(" + values_to_string(
@@ -73,7 +77,7 @@ def values_to_string(val: dict):
         value_str = str(value)
         value_str = value_str.replace("'", "\\'")
         value_str = value_str.replace('"', '\\"')
-        value_str ="'" + value_str + "'"
+        value_str = "'" + value_str + "'"
         res = res + value_str
 
         res = res + ','
