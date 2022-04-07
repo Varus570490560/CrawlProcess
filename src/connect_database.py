@@ -35,11 +35,14 @@ def execute_sql(db: pymysql.connections.Connection, sql: str, args: tuple = None
 
 
 def save(db: pymysql.connections.Connection, table_name: str, val: dict, unique_keys: tuple = None):
+    crawl_db: pymysql.Connect.db = None
+    sha256: str = ''
     if unique_keys is not None:
         lst: list = list()
         for unique_key in unique_keys:
             lst.append(val[unique_key])
-        sha256_dict = {'sha256': generate_sha256(unique_values=tuple(lst))}
+        sha256: str = generate_sha256(unique_values=tuple(lst))
+        sha256_dict = {'sha256': sha256}
         crawl_db = open_database('crawl')
         if save(db=crawl_db, table_name='remove_duplication', val=sha256_dict) is False:
             return False
@@ -47,6 +50,8 @@ def save(db: pymysql.connections.Connection, table_name: str, val: dict, unique_
     sql: str = "INSERT INTO `" + table_name + "` (" + keys_to_string(val=val) + ")VALUES(" + values_to_string(
         val=val) + ");"
     if execute_sql(db=db, sql=sql) is None:
+        if crawl_db is not None:
+            execute_sql(db=crawl_db, sql="DELETE FROM `remove_duplication` WHERE `sha256` = %s;", args=(sha256,))
         return False
     else:
         return True
